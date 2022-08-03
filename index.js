@@ -6,63 +6,15 @@ canvas.height = 576;
 c.fillRect(0, 0, canvas.width, canvas.height);
 
 const gravity = 0.7;
-class Sprite {
-	constructor( {position, velocity, color = 'red', offset} ) {
-		this.position = position;
-		this.velocity = velocity;
-		this.width = 50;
-		this.height = 150;
-		this.lastKey;
-		this.health = 100;
-		this.attackBox = {
-			position: {
-				x: this.position.x,
-				y: this.position.y
-			},
-			offset: offset,
-			width: 100,
-			height: 50
-		};
-		this.color = color;
-		this.isAttacking = false;
-	}
+const background = new Sprite({
+	position: {
+		x: 0,
+		y: 0
+	},
+	imageSrc: './imgs/parallax_forest_pack/layers/background.png'
+});
 
-	draw() {
-		c.fillStyle = this.color;
-		c.fillRect(this.position.x, this.position.y, this.width, this.height);
-		// attack box
-		if (this.isAttacking) {
-			c.fillStyle = 'purple'
-			c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height)
-		}
-
-	}
-	update() {
-		this.draw();
-		//attack box animation
-		this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
-		this.attackBox.position.y = this.position.y;
-
-		//player movment
-		this.position.x += this.velocity.x;
-		this.position.y += this.velocity.y;
-
-		if (this.position.y + this.height + this.velocity.y >= canvas.height) {
-			this.velocity.y = 0;
-
-		} else {
-			this.velocity.y += gravity
-		}
-	}
-	attack() {
-			this.isAttacking = true
-			setTimeout(() => {
-				this.isAttacking = false
-			}, 1000)
-		}
-}
-
-const player = new Sprite({
+const player = new Fighter({
 	position: {
 		x: 0,
 		y: 0
@@ -77,7 +29,7 @@ const player = new Sprite({
 	}
 });
 
-const enemy = new Sprite({
+const enemy = new Fighter({
 	position: {
 		x: 400,
 		y: 100
@@ -117,19 +69,31 @@ function rectangularCollision({ rectangle1, rectangle2}) {
 		rectangle1.attackBox.position.y <= rectangle2.position.y + rectangle2.height
 		);
 }
-let timer = 4
+
+function determineWinner({player, enemy, timerId}) {
+	clearTimeout(timerId);
+	document.querySelector('#display-text').style.display = 'flex';
+	if (player.health === enemy.health) {
+			document.querySelector('#display-text').innerHTML = 'TIE!'	
+		} else if (player.health > enemy.health) {
+			document.querySelector('#display-text').innerHTML = 'Player 1 Wins!'
+		} else if (player.health < enemy.health) {
+			document.querySelector('#display-text').innerHTML = 'Player 2 Wins!'
+		} 
+}
+
+let timer = 60
+let timerId
 function decreaseTimer() {
-	setTimeout(decreaseTimer, 1000)
+	timerId = setTimeout(decreaseTimer, 1000)
 	if (timer > 0) {
 		timer--
 		document.querySelector('#timer').innerHTML = timer;
 	}
 	if (timer === 0){
-		if (player.health === enemy.health) {
-			document.querySelector('#display-text').innerHTML = 'TIE'
-			document.querySelector('#display-text').style.display = 'flex';
-		}
+		determineWinner({player, enemy});
 	}
+
 }
 
 decreaseTimer()
@@ -137,6 +101,7 @@ function animate() {
 	window.requestAnimationFrame(animate);
 	c.fillStyle = 'black';
 	c.fillRect(0,0, canvas.width, canvas.height);
+	background.update();
 	player.update();
 	enemy.update();
 
@@ -178,6 +143,11 @@ function animate() {
 		enemy.isAttacking = false
 		player.health -= 20;
 		document.querySelector('#player-health').style.width = player.health + '%';
+	}
+
+	//end game based on health
+	if (enemy.health <= 0 || player.health <= 0) {
+		determineWinner({player, enemy, timerId})
 	}
 }
 
