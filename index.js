@@ -5,13 +5,39 @@ canvas.height = 576;
 
 c.fillRect(0, 0, canvas.width, canvas.height);
 
+
 const gravity = 0.7;
-const background = new Sprite({
+const layer1 = new Sprite({
 	position: {
 		x: 0,
 		y: 0
 	},
-	imageSrc: './imgs/parallax_forest_pack/layers/background.png'
+	imageSrc: './imgs/parallax_forest_pack/layers/1.png',
+	framesMax: 1
+});
+const layer2 = new Sprite({
+	position: {
+		x: 0,
+		y: 0
+	},
+	imageSrc: './imgs/parallax_forest_pack/layers/2.png',
+	framesMax: 1
+});
+const layer3 = new Sprite({
+	position: {
+		x: 0,
+		y: 0
+	},
+	imageSrc: './imgs/parallax_forest_pack/layers/4.png',
+	framesMax: 1
+});
+const layer4 = new Sprite({
+	position: {
+		x: 0,
+		y: 0
+	},
+	imageSrc: './imgs/parallax_forest_pack/layers/3.png',
+	framesMax: 1
 });
 
 const player = new Fighter({
@@ -23,9 +49,46 @@ const player = new Fighter({
 		x: 0,
 		y: 0
 	},
+	imageSrc: `./imgs/samuraiMack/idle.png`,
+	framesMax: 8,
+	scale: 2.5,
 	offset: {
-		x: 0,
-		y: 0
+		x: 157,
+		y: 157
+	},
+	sprites: {
+		idle: {
+			imageSrc:`./imgs/samuraiMack/Idle.png`,
+			framesMax: 8
+		},
+		run: {
+			imageSrc:`./imgs/samuraiMack/Run.png`,
+			framesMax: 8
+		},
+		jump: {
+			imageSrc:`./imgs/samuraiMack/Jump.png`,
+			framesMax: 2
+		},
+		attack1: {
+			imageSrc:`./imgs/samuraiMack/Attack1.png`,
+			framesMax: 6
+		},
+		attack2: {
+			imageSrc:`./imgs/samuraiMack/Attack2.png`,
+			framesMax: 6
+		},
+		fall: {
+			imageSrc:`./imgs/samuraiMack/Fall.png`,
+			framesMax: 2
+		},
+		death: {
+			imageSrc:`./imgs/samuraiMack/Death.png`,
+			framesMax: 6
+		},
+		takeHit: {
+			imageSrc:`./imgs/samuraiMack/Take Hit.png`,
+			framesMax: 4
+		}
 	}
 });
 
@@ -38,10 +101,46 @@ const enemy = new Fighter({
 		x: 0,
 		y: 0
 	},
-	color: 'blue',
+	imageSrc: `./imgs/kenji/Idle.png`,
+	framesMax: 4,
+	scale: 2.5,
 	offset: {
-		x: -50,
-		y: 0
+		x: -288,
+		y: 172
+	},
+	sprites: {
+		idle: {
+			imageSrc:`./imgs/kenji/Idle.png`,
+			framesMax: 8
+		},
+		run: {
+			imageSrc:`./imgs/kenji/Run.png`,
+			framesMax: 8
+		},
+		jump: {
+			imageSrc:`./imgs/kenji/Jump.png`,
+			framesMax: 2
+		},
+		attack1: {
+			imageSrc:`./imgs/kenji/Attack1.png`,
+			framesMax: 6
+		},
+		attack2: {
+			imageSrc:`./imgs/kenji/Attack2.png`,
+			framesMax: 6
+		},
+		fall: {
+			imageSrc:`./imgs/kenji/Fall.png`,
+			framesMax: 2
+		},
+		death: {
+			imageSrc:`./imgs/kenji/Death.png`,
+			framesMax: 6
+		},
+		takeHit: {
+			imageSrc:`./imgs/kenji/Take Hit.png`,
+			framesMax: 4
+		}
 	}
 	
 });
@@ -99,9 +198,12 @@ function decreaseTimer() {
 decreaseTimer()
 function animate() {
 	window.requestAnimationFrame(animate);
-	c.fillStyle = 'black';
+	// c.fillStyle = 'black';
 	c.fillRect(0,0, canvas.width, canvas.height);
-	background.update();
+	layer1.update();
+	layer2.update();
+	layer3.update();
+	layer4.update();
 	player.update();
 	enemy.update();
 
@@ -109,17 +211,31 @@ function animate() {
 	enemy.velocity.x = 0;
 
 	//player movment
+	player.image = player.sprites.idle.image
 	if (keys.a.pressed && player.lastKey === 'a') {
 		player.velocity.x = -5
+		player.image = player.sprites.run.image
 	} else if (keys.d.pressed && player.lastKey === 'd') {
 		player.velocity.x = 5
+		player.image = player.sprites.run.image
+	}
+	if (player.velocity.y < 0) {
+		player.image = player.sprites.jump.image
+		player.framesMax = player.sprites.jump.framesMax
 	}
 
 	//enemy movement
+	enemy.image = enemy.sprites.idle.image
 		if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
-		enemy.velocity.x = -5
+		enemy.velocity.x = -10
+		enemy.image = enemy.sprites.run.image
 	} else if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
-		enemy.velocity.x = 5
+		enemy.velocity.x = 10
+		enemy.image = enemy.sprites.run.image
+	}
+	if (enemy.velocity.y < 0) {
+		enemy.image = enemy.sprites.jump.image
+		enemy.framesMax = enemy.sprites.jump.framesMax
 	}
 
 	//detect collision
